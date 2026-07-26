@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PELIT CALCULATOR - Freemium SaaS</title>
+  <title>PELIT CALCULATOR - Freemium SaaS dengan QRIS</title>
   <style>
     /* ==================== VARIABLE & THEMES ==================== */
     :root {
@@ -320,8 +320,8 @@
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
       display: none;
       justify-content: center;
       align-items: center;
@@ -334,17 +334,18 @@
     .modal-content {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 24px;
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       text-align: center;
       color: var(--text-main);
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
     }
     .modal-content h3 {
       font-size: 1.3rem;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .modal-content p {
       font-size: 0.9rem;
@@ -376,6 +377,10 @@
       color: #fff;
       font-size: 0.95rem;
       margin-bottom: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-modal:hover {
+      opacity: 0.9;
     }
     .btn-close-modal {
       background: transparent;
@@ -386,12 +391,78 @@
       text-decoration: underline;
     }
 
-    /* Toast */
+    /* ==================== QRIS DISPLAY STYLE ==================== */
+    .qris-box {
+      background-color: #ffffff;
+      color: #000000;
+      border-radius: 16px;
+      padding: 16px;
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid #e2e8f0;
+    }
+    .qris-header-logo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      border-bottom: 2px solid #ef4444;
+      padding-bottom: 6px;
+    }
+    .qris-title {
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: #dc2626;
+      letter-spacing: -0.5px;
+    }
+    .qris-gpn {
+      font-size: 0.7rem;
+      font-weight: bold;
+      background-color: #dc2626;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .qris-merchant {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #0f172a;
+      margin-top: 4px;
+    }
+    .qris-nmid {
+      font-size: 0.75rem;
+      color: #475569;
+      font-weight: 600;
+    }
+    .qris-image {
+      width: 210px;
+      height: 210px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      padding: 6px;
+      background-color: #fff;
+    }
+    .price-tag {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    /* Toast Notification */
     .toast {
       position: fixed;
       top: 20px;
       right: 20px;
-      background-color: #334155;
+      background-color: #10b981;
       color: #fff;
       padding: 12px 20px;
       border-radius: 10px;
@@ -399,7 +470,7 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       display: none;
       z-index: 1000;
-      border-left: 4px solid #f59e0b;
+      font-weight: bold;
     }
     .toast.active {
       display: block;
@@ -548,7 +619,7 @@
     </div>
   </div>
 
-  <!-- ==================== MODALS & TOAST ==================== -->
+  <!-- ==================== MODALS ==================== -->
 
   <!-- Modal Limit Exceeded -->
   <div id="limitModal" class="modal-overlay">
@@ -570,7 +641,7 @@
     </div>
   </div>
 
-  <!-- Modal Upgrade Premium -->
+  <!-- Modal Upgrade Benefit -->
   <div id="upgradeModal" class="modal-overlay">
     <div class="modal-content">
       <h3>UPGRADE KE PREMIUM 👑</h3>
@@ -584,14 +655,42 @@
         <div>✅ Badge "SUPPORTER PELIT 👑"</div>
       </div>
 
-      <button class="btn-modal" onclick="handleSubscribe()">LANGGANAN SEKARANG</button>
+      <button class="btn-modal" onclick="openQrisModal()">BAYAR SEKARANG VIA QRIS 💳</button>
       <button class="btn-close-modal" onclick="closeUpgradeModal()">Batal</button>
+    </div>
+  </div>
+
+  <!-- Modal QRIS Payment -->
+  <div id="qrisModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Pembayaran Premium 💳</h3>
+      <p style="margin-bottom:8px;">Scan QRIS di bawah ini dengan aplikasi E-Wallet atau Banking kamu:</p>
+      
+      <div class="price-tag">Nominal: Rp 9.900</div>
+
+      <!-- QRIS Box Layout -->
+      <div class="qris-box">
+        <div class="qris-header-logo">
+          <span class="qris-title">QRIS</span>
+          <span class="qris-gpn">GPN</span>
+        </div>
+        <div class="qris-merchant">HAN JB OK1357479</div>
+        <div class="qris-nmid">NMID : ID2023294690854</div>
+        
+        <!-- Generated Dynamic QR Code targeting the Merchant Data -->
+        <img class="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=00020101021126580014id.co.qr-indonesia01189360050300000000000215ID20232946908540303A0151440014id.co.qr-indonesia0215ID20232946908545204581253033605802ID5915HAN%20JB%20OK13574796006CIOMAS6105166106304" alt="QRIS Code">
+        
+        <div style="font-size:0.7rem; color:#64748b; font-weight:600;">Satu QRIS Untuk Semua Pembayaran</div>
+      </div>
+
+      <button id="btnConfirmPay" class="btn-modal" onclick="confirmPaymentProcess()">KONFIRMASI SUDAH BAYAR 🚀</button>
+      <button class="btn-close-modal" onclick="closeQrisModal()">Kembali</button>
     </div>
   </div>
 
   <!-- Toast Notification -->
   <div id="toastNotif" class="toast">
-    Fitur pembayaran masih dalam pengembangan 😭💳
+    Pembayaran Berhasil! Status Premium Aktif! 🎉👑
   </div>
 
   <!-- ==================== PANEL TESTING DEMO ==================== -->
@@ -698,7 +797,7 @@
         themeSelect.options[2].text = 'Neon Rose 🔒';
         themeSelect.options[3].text = 'Emerald 🔒';
 
-        // If currently in premium theme while downgrading, reset theme to default
+        // Reset to default theme if downgrading
         if (currentTheme !== 'default') {
           handleThemeChange('default');
         }
@@ -776,7 +875,6 @@
 
         document.getElementById('subDisplay').textContent = `${currentExpression} =`;
         
-        // Add to history if Premium
         if (isPremium) {
           addHistoryLog(`${currentExpression} = ${result}`);
         }
@@ -785,7 +883,6 @@
         updateDisplay(currentExpression);
         isNewCalculation = true;
 
-        // Deduct Quota if Free
         if (!isPremium) {
           quota--;
           localStorage.setItem('pelit_quota', quota);
@@ -900,7 +997,7 @@
       });
     }
 
-    // Modal Control Functions
+    // Modal Control & Payment Handling
     function openLimitModal() { document.getElementById('limitModal').classList.add('active'); }
     function closeLimitModal() { document.getElementById('limitModal').classList.remove('active'); }
 
@@ -910,13 +1007,35 @@
     function openUpgradeModal() { document.getElementById('upgradeModal').classList.add('active'); }
     function closeUpgradeModal() { document.getElementById('upgradeModal').classList.remove('active'); }
 
-    function handleSubscribe() {
+    function openQrisModal() {
       closeUpgradeModal();
-      const toast = document.getElementById('toastNotif');
-      toast.classList.add('active');
+      document.getElementById('qrisModal').classList.add('active');
+    }
+    function closeQrisModal() { document.getElementById('qrisModal').classList.remove('active'); }
+
+    // Payment Confirmation Logic
+    function confirmPaymentProcess() {
+      const btn = document.getElementById('btnConfirmPay');
+      btn.textContent = 'Memverifikasi Pembayaran... ⏳';
+      btn.disabled = true;
+
       setTimeout(() => {
-        toast.classList.remove('active');
-      }, 3500);
+        btn.textContent = 'KONFIRMASI SUDAH BAYAR 🚀';
+        btn.disabled = false;
+        closeQrisModal();
+
+        // Enable Premium Mode
+        isPremium = true;
+        localStorage.setItem('pelit_premium', 'true');
+        updatePremiumStateUI();
+
+        // Show Toast
+        const toast = document.getElementById('toastNotif');
+        toast.classList.add('active');
+        setTimeout(() => {
+          toast.classList.remove('active');
+        }, 4000);
+      }, 1500);
     }
 
     // Testing Panel Handlers
@@ -934,4 +1053,3 @@
   </script>
 </body>
 </html>
-
