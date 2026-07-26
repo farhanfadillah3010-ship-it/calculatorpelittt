@@ -1,1 +1,937 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PELIT CALCULATOR - Freemium SaaS</title>
+  <style>
+    /* ==================== VARIABLE & THEMES ==================== */
+    :root {
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --bg-display: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --btn-bg: #334155;
+      --btn-hover: #475569;
+      --btn-op: #0284c7;
+      --btn-op-hover: #0369a1;
+      --border-color: #334155;
+      --card-shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    body.theme-cyberpunk {
+      --bg-body: #050508;
+      --bg-card: #12121a;
+      --bg-display: #08080c;
+      --text-main: #ffe600;
+      --text-muted: #00f0ff;
+      --accent: #ffe600;
+      --accent-hover: #cca800;
+      --btn-bg: #1a1a26;
+      --btn-hover: #262638;
+      --btn-op: #ff0055;
+      --btn-op-hover: #cc0044;
+      --border-color: #00f0ff44;
+      --card-shadow: rgba(0, 240, 255, 0.2);
+    }
+
+    body.theme-neon-rose {
+      --bg-body: #110314;
+      --bg-card: #1f0724;
+      --bg-display: #0a010c;
+      --text-main: #ff71ce;
+      --text-muted: #b571ff;
+      --accent: #ff007f;
+      --accent-hover: #d10068;
+      --btn-bg: #2d0b34;
+      --btn-hover: #41114a;
+      --btn-op: #9d00ff;
+      --btn-op-hover: #7b00c7;
+      --border-color: #ff007f44;
+      --card-shadow: rgba(255, 0, 127, 0.25);
+    }
+
+    body.theme-emerald {
+      --bg-body: #021a12;
+      --bg-card: #062c1e;
+      --bg-display: #01120c;
+      --text-main: #34d399;
+      --text-muted: #6ee7b7;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --btn-bg: #0b402c;
+      --btn-hover: #10523a;
+      --btn-op: #047857;
+      --btn-op-hover: #065f46;
+      --border-color: #10b98144;
+      --card-shadow: rgba(16, 185, 129, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* ==================== CALCULATOR CARD ==================== */
+    .calc-card {
+      background-color: var(--bg-card);
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 15px 35px var(--card-shadow);
+      width: 100%;
+      max-width: 440px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    /* Header */
+    .calc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-tier {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-free {
+      background-color: #ef4444;
+      color: #fff;
+    }
+    .badge-premium {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    .btn-upgrade-head {
+      background: linear-gradient(135deg, #f59e0b, #b45309);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn-upgrade-head:hover {
+      transform: scale(1.05);
+    }
+
+    /* Ticker */
+    .ticker-box {
+      background-color: var(--bg-display);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px italic transparent;
+      font-style: italic;
+    }
+
+    /* Progress Bar Jatah */
+    .quota-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .quota-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background-color: var(--bg-display);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 100%;
+      background-color: #10b981;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* Display */
+    .display-box {
+      background-color: var(--bg-display);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: right;
+      border: 1px solid var(--border-color);
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      word-break: break-all;
+    }
+    .sub-display {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      min-height: 18px;
+    }
+    .main-display {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text-main);
+    }
+
+    /* Control Bar */
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .select-theme, .btn-tool {
+      background-color: var(--btn-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .btn-tool {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Keypad Grid */
+    .keypad {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sci-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .sci-grid button {
+      background-color: var(--btn-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .basic-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .basic-grid button {
+      padding: 16px 0;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: none;
+      background-color: var(--btn-bg);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background-color 0.1s, transform 0.1s;
+    }
+    .basic-grid button:active {
+      transform: scale(0.96);
+    }
+    .basic-grid button.btn-op {
+      background-color: var(--btn-op);
+      color: #fff;
+    }
+    .basic-grid button.btn-action {
+      background-color: #dc2626;
+      color: #fff;
+    }
+    .basic-grid button.btn-equals {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+    }
+    .span-2 {
+      grid-column: span 2;
+    }
+
+    /* History Drawer */
+    .history-drawer {
+      background-color: var(--bg-display);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .history-drawer.active {
+      display: flex;
+    }
+    .history-item {
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 4px;
+      color: var(--text-muted);
+    }
+
+    /* ==================== MODALS & TOAST ==================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      color: var(--text-main);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-content h3 {
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+    }
+    .modal-content p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    .benefits-list {
+      text-align: left;
+      font-size: 0.85rem;
+      margin: 12px 0 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .benefits-list div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-modal {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #334155;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      display: none;
+      z-index: 1000;
+      border-left: 4px solid #f59e0b;
+    }
+    .toast.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* ==================== TESTING PANEL ==================== */
+    .test-panel {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+      z-index: 800;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .test-panel span {
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+    .test-panel-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .test-panel-btns button {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-reset-test {
+      background-color: #38bdf8;
+      color: #0f172a;
+    }
+    .btn-switch-test {
+      background-color: #f59e0b;
+      color: #fff;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== CALCULATOR MAIN ==================== -->
+  <div class="calc-card">
+    <!-- Header -->
+    <div class="calc-header">
+      <span id="tierBadge" class="badge-tier badge-free">FREE TIER</span>
+      <button id="btnUpgradeHeader" class="btn-upgrade-head" onclick="openUpgradeModal()">UPGRADE KE PREMIUM 👑</button>
+    </div>
+
+    <!-- Ticker Copywriting -->
+    <div class="ticker-box" id="tickerBox">
+      "Gratis boleh, tapi jangan kebanyakan hitung dong 😭"
+    </div>
+
+    <!-- Progress Jatah Gratis -->
+    <div class="quota-box" id="quotaContainer">
+      <div class="quota-info">
+        <span>Sisa Jatah Hitung Gratis</span>
+        <span id="quotaText">5 / 5</span>
+      </div>
+      <div class="progress-track">
+        <div id="progressBar" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- Display -->
+    <div class="display-box">
+      <div id="subDisplay" class="sub-display"></div>
+      <div id="mainDisplay" class="main-display">0</div>
+    </div>
+
+    <!-- Tools / Controls -->
+    <div class="control-bar">
+      <select id="themeSelect" class="select-theme" onchange="handleThemeChange(this.value)">
+        <option value="default">Default Dark</option>
+        <option value="cyberpunk">Cyberpunk 🔒</option>
+        <option value="neon-rose">Neon Rose 🔒</option>
+        <option value="emerald">Emerald 🔒</option>
+      </select>
+      <button class="btn-tool" onclick="handleHistoryToggle()">
+        Riwayat <span id="historyLockIcon">🔒</span>
+      </button>
+    </div>
+
+    <!-- History Panel -->
+    <div id="historyDrawer" class="history-drawer">
+      <div style="font-size:0.75rem; font-weight:bold; color:var(--text-muted); margin-bottom:4px;">RIWAYAT PERHITUNGAN</div>
+      <div id="historyList"></div>
+    </div>
+
+    <!-- Keypad -->
+    <div class="keypad">
+      <!-- Scientific Row -->
+      <div class="sci-grid">
+        <button onclick="handleSciInput('sin')">sin <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('cos')">cos <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('tan')">tan <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('log')">log <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('sqrt')">√ <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('pow')">x² <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('pi')">π <span class="sci-lock">🔒</span></button>
+        <button onclick="handleSciInput('e')">e <span class="sci-lock">🔒</span></button>
+      </div>
+
+      <!-- Basic Buttons -->
+      <div class="basic-grid">
+        <button class="btn-action" onclick="clearAll()">AC</button>
+        <button class="btn-action" onclick="deleteChar()">DEL</button>
+        <button class="btn-op" onclick="handlePercentInput()">% <span class="pct-lock">🔒</span></button>
+        <button class="btn-op" onclick="appendOp('/')">÷</button>
+
+        <button onclick="appendNum('7')">7</button>
+        <button onclick="appendNum('8')">8</button>
+        <button onclick="appendNum('9')">9</button>
+        <button class="btn-op" onclick="appendOp('*')">×</button>
+
+        <button onclick="appendNum('4')">4</button>
+        <button onclick="appendNum('5')">5</button>
+        <button onclick="appendNum('6')">6</button>
+        <button class="btn-op" onclick="appendOp('-')">-</button>
+
+        <button onclick="appendNum('1')">1</button>
+        <button onclick="appendNum('2')">2</button>
+        <button onclick="appendNum('3')">3</button>
+        <button class="btn-op" onclick="appendOp('+')">+</button>
+
+        <button onclick="appendNum('0')" class="span-2">0</button>
+        <button onclick="appendNum('.')">.</button>
+        <button class="btn-equals" onclick="executeCalculate()">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODALS & TOAST ==================== -->
+
+  <!-- Modal Limit Exceeded -->
+  <div id="limitModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Limit Gratis Habis! 😭💸</h3>
+      <p>Waduhh… jatah gratis kamu habiss 😭💸 Kalkulator ini juga butuh makan, silakan upgrade ke Premium.</p>
+      <button class="btn-modal" onclick="closeLimitModal(); openUpgradeModal();">UPGRADE SEKARANG 👑</button>
+      <button class="btn-close-modal" onclick="closeLimitModal()">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Modal Feature Locked -->
+  <div id="lockModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Fitur Terkunci 🔒</h3>
+      <p>Fitur ini khusus member Premium 😭</p>
+      <button class="btn-modal" onclick="closeLockModal(); openUpgradeModal();">LIHAT PAKET PREMIUM 👑</button>
+      <button class="btn-close-modal" onclick="closeLockModal()">Nanti Saja</button>
+    </div>
+  </div>
+
+  <!-- Modal Upgrade Premium -->
+  <div id="upgradeModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>UPGRADE KE PREMIUM 👑</h3>
+      <p style="color:#f59e0b; font-weight:bold; font-size:1.1rem;">Hanya Rp9.900 / bulan</p>
+      
+      <div class="benefits-list">
+        <div>✅ Perhitungan TANPA BATAS (Unlimited)</div>
+        <div>✅ Scientific Calculator (sin, cos, log, dll)</div>
+        <div>✅ Riwayat Perhitungan (History Log)</div>
+        <div>✅ Pemilih Tema (Cyberpunk, Neon Rose, Emerald)</div>
+        <div>✅ Badge "SUPPORTER PELIT 👑"</div>
+      </div>
+
+      <button class="btn-modal" onclick="handleSubscribe()">LANGGANAN SEKARANG</button>
+      <button class="btn-close-modal" onclick="closeUpgradeModal()">Batal</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toastNotif" class="toast">
+    Fitur pembayaran masih dalam pengembangan 😭💳
+  </div>
+
+  <!-- ==================== PANEL TESTING DEMO ==================== -->
+  <div class="test-panel">
+    <span>🛠️ Panel Testing Demo</span>
+    <div class="test-panel-btns">
+      <button class="btn-reset-test" onclick="resetQuotaDemo()">Reset Jatah (5)</button>
+      <button class="btn-switch-test" id="btnTogglePremiumDemo" onclick="togglePremiumDemo()">Switch to PREMIUM 👑</button>
+    </div>
+  </div>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    // State Management
+    let quota = localStorage.getItem('pelit_quota') !== null ? parseInt(localStorage.getItem('pelit_quota')) : 5;
+    let isPremium = localStorage.getItem('pelit_premium') === 'true';
+    let currentTheme = localStorage.getItem('pelit_theme') || 'default';
+    let historyLogs = JSON.parse(localStorage.getItem('pelit_history') || '[]');
+
+    let currentExpression = '';
+    let isNewCalculation = false;
+
+    // Quotes Ticker Data
+    const quotes = [
+      '"Gratis boleh, tapi jangan kebanyakan hitung dong 😭"',
+      '"Waduhh, kalkulatornya lagi pelit banget nih 😭"',
+      '"Mau hitung terus? Bayar dulu bos 💸"',
+      '"Premium itu bukan gaya-gayaan, ini soal kebutuhan 😌"'
+    ];
+    let quoteIndex = 0;
+
+    // Initialize UI on Load
+    window.onload = () => {
+      applyTheme(currentTheme);
+      updateQuotaUI();
+      updatePremiumStateUI();
+      startQuotesTicker();
+      setupKeyboardListeners();
+    };
+
+    // Quotes Auto Rotate
+    function startQuotesTicker() {
+      setInterval(() => {
+        quoteIndex = (quoteIndex + 1) % quotes.length;
+        document.getElementById('tickerBox').textContent = quotes[quoteIndex];
+      }, 4000);
+    }
+
+    // Quota Management
+    function updateQuotaUI() {
+      const quotaText = document.getElementById('quotaText');
+      const progressBar = document.getElementById('progressBar');
+      const quotaContainer = document.getElementById('quotaContainer');
+
+      if (isPremium) {
+        quotaContainer.style.display = 'none';
+        return;
+      }
+
+      quotaContainer.style.display = 'flex';
+      quotaText.textContent = `${quota} / 5`;
+      const percentage = (quota / 5) * 100;
+      progressBar.style.width = `${percentage}%`;
+
+      // Color transition
+      if (quota > 2) {
+        progressBar.style.backgroundColor = '#10b981'; // Green
+      } else if (quota === 2) {
+        progressBar.style.backgroundColor = '#f59e0b'; // Gold
+      } else {
+        progressBar.style.backgroundColor = '#ef4444'; // Red
+      }
+    }
+
+    function updatePremiumStateUI() {
+      const tierBadge = document.getElementById('tierBadge');
+      const btnUpgradeHeader = document.getElementById('btnUpgradeHeader');
+      const historyLockIcon = document.getElementById('historyLockIcon');
+      const sciLocks = document.querySelectorAll('.sci-lock');
+      const pctLock = document.querySelector('.pct-lock');
+      const themeSelect = document.getElementById('themeSelect');
+
+      if (isPremium) {
+        tierBadge.textContent = 'SUPPORTER PELIT 👑';
+        tierBadge.className = 'badge-tier badge-premium';
+        btnUpgradeHeader.style.display = 'none';
+        historyLockIcon.style.display = 'none';
+        sciLocks.forEach(el => el.style.display = 'none');
+        pctLock.style.display = 'none';
+
+        // Unlock theme dropdown options text
+        themeSelect.options[1].text = 'Cyberpunk';
+        themeSelect.options[2].text = 'Neon Rose';
+        themeSelect.options[3].text = 'Emerald';
+      } else {
+        tierBadge.textContent = 'FREE TIER';
+        tierBadge.className = 'badge-tier badge-free';
+        btnUpgradeHeader.style.display = 'block';
+        historyLockIcon.style.display = 'inline';
+        sciLocks.forEach(el => el.style.display = 'inline');
+        pctLock.style.display = 'inline';
+
+        themeSelect.options[1].text = 'Cyberpunk 🔒';
+        themeSelect.options[2].text = 'Neon Rose 🔒';
+        themeSelect.options[3].text = 'Emerald 🔒';
+
+        // If currently in premium theme while downgrading, reset theme to default
+        if (currentTheme !== 'default') {
+          handleThemeChange('default');
+        }
+      }
+
+      document.getElementById('btnTogglePremiumDemo').textContent = isPremium ? 'Switch to FREE' : 'Switch to PREMIUM 👑';
+      updateQuotaUI();
+    }
+
+    // Display Logic
+    function updateDisplay(val, sub = '') {
+      document.getElementById('mainDisplay').textContent = val || '0';
+      if (sub) document.getElementById('subDisplay').textContent = sub;
+    }
+
+    function appendNum(num) {
+      if (isNewCalculation) {
+        currentExpression = '';
+        isNewCalculation = false;
+      }
+      currentExpression += num;
+      updateDisplay(currentExpression);
+    }
+
+    function appendOp(op) {
+      if (isNewCalculation) isNewCalculation = false;
+      if (currentExpression === '' && op !== '-') return;
+      
+      const lastChar = currentExpression.slice(-1);
+      if (['+', '-', '*', '/'].includes(lastChar)) {
+        currentExpression = currentExpression.slice(0, -1) + op;
+      } else {
+        currentExpression += op;
+      }
+      updateDisplay(currentExpression);
+    }
+
+    function clearAll() {
+      currentExpression = '';
+      document.getElementById('subDisplay').textContent = '';
+      updateDisplay('0');
+    }
+
+    function deleteChar() {
+      if (isNewCalculation) {
+        clearAll();
+        return;
+      }
+      currentExpression = currentExpression.slice(0, -1);
+      updateDisplay(currentExpression || '0');
+    }
+
+    // Calculation Execution
+    function executeCalculate() {
+      if (!isPremium && quota <= 0) {
+        openLimitModal();
+        return;
+      }
+
+      if (!currentExpression) return;
+
+      try {
+        let evalExpr = currentExpression
+          .replace(/×/g, '*')
+          .replace(/÷/g, '/');
+
+        let result = eval(evalExpr);
+
+        if (!isFinite(result)) {
+          updateDisplay('Error');
+          return;
+        }
+
+        result = Math.round(result * 1e8) / 1e8; // fix floating precision
+
+        document.getElementById('subDisplay').textContent = `${currentExpression} =`;
+        
+        // Add to history if Premium
+        if (isPremium) {
+          addHistoryLog(`${currentExpression} = ${result}`);
+        }
+
+        currentExpression = result.toString();
+        updateDisplay(currentExpression);
+        isNewCalculation = true;
+
+        // Deduct Quota if Free
+        if (!isPremium) {
+          quota--;
+          localStorage.setItem('pelit_quota', quota);
+          updateQuotaUI();
+        }
+
+      } catch (e) {
+        updateDisplay('Error');
+      }
+    }
+
+    // Locked Feature Handlers
+    function handleSciInput(type) {
+      if (!isPremium) {
+        openLockModal();
+        return;
+      }
+      if (!currentExpression && type !== 'pi' && type !== 'e') return;
+
+      let val = parseFloat(currentExpression) || 0;
+      let res = 0;
+
+      switch(type) {
+        case 'sin': res = Math.sin(val); break;
+        case 'cos': res = Math.cos(val); break;
+        case 'tan': res = Math.tan(val); break;
+        case 'log': res = Math.log10(val); break;
+        case 'sqrt': res = Math.sqrt(val); break;
+        case 'pow': res = Math.pow(val, 2); break;
+        case 'pi': currentExpression += Math.PI.toFixed(4); updateDisplay(currentExpression); return;
+        case 'e': currentExpression += Math.E.toFixed(4); updateDisplay(currentExpression); return;
+      }
+
+      res = Math.round(res * 1e8) / 1e8;
+      document.getElementById('subDisplay').textContent = `${type}(${val}) =`;
+      addHistoryLog(`${type}(${val}) = ${res}`);
+      currentExpression = res.toString();
+      updateDisplay(currentExpression);
+      isNewCalculation = true;
+    }
+
+    function handlePercentInput() {
+      if (!isPremium) {
+        openLockModal();
+        return;
+      }
+      if (!currentExpression) return;
+      try {
+        let val = eval(currentExpression) / 100;
+        document.getElementById('subDisplay').textContent = `${currentExpression}% =`;
+        addHistoryLog(`${currentExpression}% = ${val}`);
+        currentExpression = val.toString();
+        updateDisplay(currentExpression);
+        isNewCalculation = true;
+      } catch(e) {
+        updateDisplay('Error');
+      }
+    }
+
+    function handleHistoryToggle() {
+      if (!isPremium) {
+        openLockModal();
+        return;
+      }
+      const drawer = document.getElementById('historyDrawer');
+      drawer.classList.toggle('active');
+      renderHistory();
+    }
+
+    function handleThemeChange(theme) {
+      if (!isPremium && theme !== 'default') {
+        openLockModal();
+        document.getElementById('themeSelect').value = currentTheme;
+        return;
+      }
+      applyTheme(theme);
+    }
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      localStorage.setItem('pelit_theme', theme);
+      document.body.className = theme === 'default' ? '' : `theme-${theme}`;
+      document.getElementById('themeSelect').value = theme;
+    }
+
+    // History Log Helpers
+    function addHistoryLog(item) {
+      historyLogs.unshift(item);
+      if (historyLogs.length > 20) historyLogs.pop();
+      localStorage.setItem('pelit_history', JSON.stringify(historyLogs));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      if (historyLogs.length === 0) {
+        list.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted);">Belum ada riwayat</div>';
+        return;
+      }
+      list.innerHTML = historyLogs.map(log => `<div class="history-item"><span>${log}</span></div>`).join('');
+    }
+
+    // Keyboard Shortcuts
+    function setupKeyboardListeners() {
+      window.addEventListener('keydown', (e) => {
+        if (e.key >= '0' && e.key <= '9') appendNum(e.key);
+        if (['+', '-', '*', '/'].includes(e.key)) appendOp(e.key);
+        if (e.key === '.') appendNum('.');
+        if (e.key === 'Enter' || e.key === '=') executeCalculate();
+        if (e.key === 'Backspace') deleteChar();
+        if (e.key === 'Escape') clearAll();
+      });
+    }
+
+    // Modal Control Functions
+    function openLimitModal() { document.getElementById('limitModal').classList.add('active'); }
+    function closeLimitModal() { document.getElementById('limitModal').classList.remove('active'); }
+
+    function openLockModal() { document.getElementById('lockModal').classList.add('active'); }
+    function closeLockModal() { document.getElementById('lockModal').classList.remove('active'); }
+
+    function openUpgradeModal() { document.getElementById('upgradeModal').classList.add('active'); }
+    function closeUpgradeModal() { document.getElementById('upgradeModal').classList.remove('active'); }
+
+    function handleSubscribe() {
+      closeUpgradeModal();
+      const toast = document.getElementById('toastNotif');
+      toast.classList.add('active');
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3500);
+    }
+
+    // Testing Panel Handlers
+    function resetQuotaDemo() {
+      quota = 5;
+      localStorage.setItem('pelit_quota', quota);
+      updateQuotaUI();
+    }
+
+    function togglePremiumDemo() {
+      isPremium = !isPremium;
+      localStorage.setItem('pelit_premium', isPremium);
+      updatePremiumStateUI();
+    }
+  </script>
+</body>
+</html>
 
