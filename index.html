@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PELIT CALCULATOR - Freemium SaaS dengan QRIS</title>
+  <title>PELIT CALCULATOR - Freemium SaaS dengan QRIS 500 Perak</title>
   <style>
     /* ==================== VARIABLE & THEMES ==================== */
     :root {
@@ -337,11 +337,13 @@
       border-radius: 20px;
       padding: 24px;
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
       color: var(--text-main);
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
       position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .modal-content h3 {
       font-size: 1.3rem;
@@ -391,13 +393,13 @@
       text-decoration: underline;
     }
 
-    /* ==================== QRIS DISPLAY STYLE ==================== */
+    /* ==================== QRIS & FORM STYLE ==================== */
     .qris-box {
       background-color: #ffffff;
       color: #000000;
       border-radius: 16px;
       padding: 16px;
-      margin: 12px 0;
+      margin: 10px 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -430,7 +432,7 @@
       font-weight: 800;
       font-size: 1.1rem;
       color: #0f172a;
-      margin-top: 4px;
+      margin-top: 2px;
     }
     .qris-nmid {
       font-size: 0.75rem;
@@ -438,8 +440,8 @@
       font-weight: 600;
     }
     .qris-image {
-      width: 210px;
-      height: 210px;
+      width: 200px;
+      height: 200px;
       border-radius: 8px;
       border: 1px solid #cbd5e1;
       padding: 6px;
@@ -455,6 +457,49 @@
       font-size: 1.1rem;
       width: 100%;
       margin-bottom: 8px;
+    }
+
+    /* Form Konfirmasi */
+    .confirm-form-box {
+      background-color: var(--bg-display);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 12px 0;
+      text-align: left;
+    }
+    .confirm-form-box label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .confirm-input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-card);
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .confirm-input:focus {
+      border-color: #f59e0b;
+    }
+    .file-input-wrapper {
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .preview-img {
+      max-width: 100%;
+      max-height: 120px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+      border: 1px solid var(--border-color);
     }
 
     /* Toast Notification */
@@ -625,7 +670,7 @@
   <div id="limitModal" class="modal-overlay">
     <div class="modal-content">
       <h3>Limit Gratis Habis! 😭💸</h3>
-      <p>Waduhh… jatah gratis kamu habiss 😭💸 Kalkulator ini juga butuh makan, silakan upgrade ke Premium.</p>
+      <p>Waduhh… jatah gratis kamu habiss 😭💸 Cuma Rp500 perak aja kok, yuk upgrade ke Premium!</p>
       <button class="btn-modal" onclick="closeLimitModal(); openUpgradeModal();">UPGRADE SEKARANG 👑</button>
       <button class="btn-close-modal" onclick="closeLimitModal()">Tutup</button>
     </div>
@@ -645,7 +690,7 @@
   <div id="upgradeModal" class="modal-overlay">
     <div class="modal-content">
       <h3>UPGRADE KE PREMIUM 👑</h3>
-      <p style="color:#f59e0b; font-weight:bold; font-size:1.1rem;">Hanya Rp9.900 / bulan</p>
+      <p style="color:#f59e0b; font-weight:bold; font-size:1.1rem;">Cuma Rp 500 Perak / bulan! 🪙</p>
       
       <div class="benefits-list">
         <div>✅ Perhitungan TANPA BATAS (Unlimited)</div>
@@ -655,20 +700,20 @@
         <div>✅ Badge "SUPPORTER PELIT 👑"</div>
       </div>
 
-      <button class="btn-modal" onclick="openQrisModal()">BAYAR SEKARANG VIA QRIS 💳</button>
+      <button class="btn-modal" onclick="openQrisModal()">BAYAR SEKARANG VIA QRIS (Rp500) 💳</button>
       <button class="btn-close-modal" onclick="closeUpgradeModal()">Batal</button>
     </div>
   </div>
 
-  <!-- Modal QRIS Payment -->
+  <!-- Modal QRIS Payment & Konfirmasi -->
   <div id="qrisModal" class="modal-overlay">
     <div class="modal-content">
       <h3>Pembayaran Premium 💳</h3>
-      <p style="margin-bottom:8px;">Scan QRIS di bawah ini dengan aplikasi E-Wallet atau Banking kamu:</p>
+      <p style="margin-bottom:8px;">Scan QRIS di bawah ini via E-Wallet / Mobile Banking:</p>
       
-      <div class="price-tag">Nominal: Rp 9.900</div>
+      <div class="price-tag">Nominal: Rp 500</div>
 
-      <!-- QRIS Box Layout -->
+      <!-- QRIS Box Layout (Payload amount Rp 500) -->
       <div class="qris-box">
         <div class="qris-header-logo">
           <span class="qris-title">QRIS</span>
@@ -677,20 +722,31 @@
         <div class="qris-merchant">HAN JB OK1357479</div>
         <div class="qris-nmid">NMID : ID2023294690854</div>
         
-        <!-- Generated Dynamic QR Code targeting the Merchant Data -->
-        <img class="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=00020101021126580014id.co.qr-indonesia01189360050300000000000215ID20232946908540303A0151440014id.co.qr-indonesia0215ID20232946908545204581253033605802ID5915HAN%20JB%20OK13574796006CIOMAS6105166106304" alt="QRIS Code">
+        <img class="qris-image" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=00020101021126580014id.co.qr-indonesia01189360050300000000000215ID20232946908540303A0151440014id.co.qr-indonesia0215ID202329469085452045812530336054035005802ID5915HAN%20JB%20OK13574796006CIOMAS6105166106304" alt="QRIS Code Rp500">
         
         <div style="font-size:0.7rem; color:#64748b; font-weight:600;">Satu QRIS Untuk Semua Pembayaran</div>
       </div>
 
-      <button id="btnConfirmPay" class="btn-modal" onclick="confirmPaymentProcess()">KONFIRMASI SUDAH BAYAR 🚀</button>
+      <!-- Form Konfirmasi Pembayaran -->
+      <div class="confirm-form-box">
+        <label for="trxIdInput">1. ID Transaksi / No. Reff Pembayaran:</label>
+        <input type="text" id="trxIdInput" class="confirm-input" placeholder="Contoh: 123456789 / Ref Bank">
+
+        <label for="proofFile">2. Upload Bukti Transfer (Opsional):</label>
+        <div class="file-input-wrapper">
+          <input type="file" id="proofFile" accept="image/*" class="confirm-input" style="margin-bottom:0;" onchange="previewProofImage(this)">
+          <img id="imgPreview" class="preview-img" alt="Preview Bukti">
+        </div>
+      </div>
+
+      <button id="btnConfirmPay" class="btn-modal" onclick="confirmPaymentProcess()">KIRIM & VERIFIKASI PEMBAYARAN 🚀</button>
       <button class="btn-close-modal" onclick="closeQrisModal()">Kembali</button>
     </div>
   </div>
 
   <!-- Toast Notification -->
   <div id="toastNotif" class="toast">
-    Pembayaran Berhasil! Status Premium Aktif! 🎉👑
+    Pembayaran Rp500 Terverifikasi! Premium Aktif! 🎉👑
   </div>
 
   <!-- ==================== PANEL TESTING DEMO ==================== -->
@@ -717,8 +773,8 @@
     const quotes = [
       '"Gratis boleh, tapi jangan kebanyakan hitung dong 😭"',
       '"Waduhh, kalkulatornya lagi pelit banget nih 😭"',
-      '"Mau hitung terus? Bayar dulu bos 💸"',
-      '"Premium itu bukan gaya-gayaan, ini soal kebutuhan 😌"'
+      '"Cuma 500 perak doang padahal, bayar lah bos 💸"',
+      '"Premium Rp500 itu bukan gaya-gayaan, ini soal butuh 😌"'
     ];
     let quoteIndex = 0;
 
@@ -755,13 +811,12 @@
       const percentage = (quota / 5) * 100;
       progressBar.style.width = `${percentage}%`;
 
-      // Color transition
       if (quota > 2) {
-        progressBar.style.backgroundColor = '#10b981'; // Green
+        progressBar.style.backgroundColor = '#10b981';
       } else if (quota === 2) {
-        progressBar.style.backgroundColor = '#f59e0b'; // Gold
+        progressBar.style.backgroundColor = '#f59e0b';
       } else {
-        progressBar.style.backgroundColor = '#ef4444'; // Red
+        progressBar.style.backgroundColor = '#ef4444';
       }
     }
 
@@ -781,7 +836,6 @@
         sciLocks.forEach(el => el.style.display = 'none');
         pctLock.style.display = 'none';
 
-        // Unlock theme dropdown options text
         themeSelect.options[1].text = 'Cyberpunk';
         themeSelect.options[2].text = 'Neon Rose';
         themeSelect.options[3].text = 'Emerald';
@@ -797,7 +851,6 @@
         themeSelect.options[2].text = 'Neon Rose 🔒';
         themeSelect.options[3].text = 'Emerald 🔒';
 
-        // Reset to default theme if downgrading
         if (currentTheme !== 'default') {
           handleThemeChange('default');
         }
@@ -871,7 +924,7 @@
           return;
         }
 
-        result = Math.round(result * 1e8) / 1e8; // fix floating precision
+        result = Math.round(result * 1e8) / 1e8;
 
         document.getElementById('subDisplay').textContent = `${currentExpression} =`;
         
@@ -997,7 +1050,22 @@
       });
     }
 
-    // Modal Control & Payment Handling
+    // Preview Image Bukti Transfer
+    function previewProofImage(input) {
+      const imgPreview = document.getElementById('imgPreview');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imgPreview.src = e.target.result;
+          imgPreview.style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        imgPreview.style.display = 'none';
+      }
+    }
+
+    // Modal Control & Sistem Konfirmasi Pembayaran
     function openLimitModal() { document.getElementById('limitModal').classList.add('active'); }
     function closeLimitModal() { document.getElementById('limitModal').classList.remove('active'); }
 
@@ -1013,29 +1081,42 @@
     }
     function closeQrisModal() { document.getElementById('qrisModal').classList.remove('active'); }
 
-    // Payment Confirmation Logic
+    // Proses Verifikasi Konfirmasi Pembayaran
     function confirmPaymentProcess() {
+      const trxId = document.getElementById('trxIdInput').value.trim();
+      const fileInput = document.getElementById('proofFile');
       const btn = document.getElementById('btnConfirmPay');
-      btn.textContent = 'Memverifikasi Pembayaran... ⏳';
+
+      if (!trxId && fileInput.files.length === 0) {
+        alert('Mohon isi ID Transaksi atau Unggah Bukti Transfer untuk verfirmasi!');
+        return;
+      }
+
+      btn.textContent = 'Mengecek Mutasi QRIS... ⏳';
       btn.disabled = true;
 
       setTimeout(() => {
-        btn.textContent = 'KONFIRMASI SUDAH BAYAR 🚀';
+        btn.textContent = 'KIRIM & VERIFIKASI PEMBAYARAN 🚀';
         btn.disabled = false;
         closeQrisModal();
 
-        // Enable Premium Mode
+        // Aktifkan Status Premium
         isPremium = true;
         localStorage.setItem('pelit_premium', 'true');
         updatePremiumStateUI();
 
-        // Show Toast
+        // Clear Form Input
+        document.getElementById('trxIdInput').value = '';
+        document.getElementById('proofFile').value = '';
+        document.getElementById('imgPreview').style.display = 'none';
+
+        // Tampilkan Toast Sukses
         const toast = document.getElementById('toastNotif');
         toast.classList.add('active');
         setTimeout(() => {
           toast.classList.remove('active');
         }, 4000);
-      }, 1500);
+      }, 2000);
     }
 
     // Testing Panel Handlers
