@@ -760,6 +760,11 @@
 
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
+    // ==================== INTEGRASI BACKEND NODE.JS ====================
+    const BACKEND_URL = 'http://localhost:3000/api';
+    const USER_ID = localStorage.getItem('pelit_user_id') || 'user_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('pelit_user_id', USER_ID);
+
     // State Management
     let quota = localStorage.getItem('pelit_quota') !== null ? parseInt(localStorage.getItem('pelit_quota')) : 5;
     let isPremium = localStorage.getItem('pelit_premium') === 'true';
@@ -785,7 +790,26 @@
       updatePremiumStateUI();
       startQuotesTicker();
       setupKeyboardListeners();
+      fetchUserStatus(); // Ambil status user terbaru dari backend
     };
+
+    // Fungsi Ambil Data User dari Server Node.js
+    async function fetchUserStatus() {
+      try {
+        const res = await fetch(`${BACKEND_URL}/user/${USER_ID}`);
+        const result = await res.json();
+        if (result.success) {
+          quota = result.data.quota;
+          isPremium = result.data.isPremium;
+          localStorage.setItem('pelit_quota', quota);
+          localStorage.setItem('pelit_premium', isPremium);
+          updateQuotaUI();
+          updatePremiumStateUI();
+        }
+      } catch (err) {
+        console.warn("Gagal terhubung ke backend lokal, menggunakan data cache browser:", err);
+      }
+    }
 
     // Quotes Auto Rotate
     function startQuotesTicker() {
@@ -1065,7 +1089,7 @@
       }
     }
 
-    // Modal Control & Sistem Konfirmasi Pembayaran
+    // Modal Control
     function openLimitModal() { document.getElementById('limitModal').classList.add('active'); }
     function closeLimitModal() { document.getElementById('limitModal').classList.remove('active'); }
 
@@ -1081,42 +1105,64 @@
     }
     function closeQrisModal() { document.getElementById('qrisModal').classList.remove('active'); }
 
-    // Proses Verifikasi Konfirmasi Pembayaran
-    function confirmPaymentProcess() {
+    // ==================== PROSES VERIFIKASI PEMBAYARAN VIA BACKEND ====================
+    async function confirmPaymentProcess() {
       const trxId = document.getElementById('trxIdInput').value.trim();
       const fileInput = document.getElementById('proofFile');
       const btn = document.getElementById('btnConfirmPay');
 
       if (!trxId && fileInput.files.length === 0) {
-        alert('Mohon isi ID Transaksi atau Unggah Bukti Transfer untuk verfirmasi!');
+        alert('Mohon isi ID Transaksi atau Unggah Bukti Transfer untuk verifikasi!');
         return;
       }
 
-      btn.textContent = 'Mengecek Mutasi QRIS... ⏳';
+      btn.textContent = 'Verifikasi ke Server... ⏳';
       btn.disabled = true;
 
-      setTimeout(() => {
+      const formData = new FormData();
+      formData.append('userId', USER_ID);
+      formData.append('trxId', trxId);
+      if (fileInput.files[0]) {
+        formData.append('proof', fileInput.files[0]);
+      }
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/payment/confirm`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          closeQrisModal();
+          
+          // Aktifkan Status Premium
+          isPremium = true;
+          localStorage.setItem('pelit_premium', 'true');
+          updatePremiumStateUI();
+
+          // Reset Form Input
+          document.getElementById('trxIdInput').value = '';
+          document.getElementById('proofFile').value = '';
+          document.getElementById('imgPreview').style.display = 'none';
+
+          // Tampilkan Toast Sukses
+          const toast = document.getElementById('toastNotif');
+          toast.classList.add('active');
+          setTimeout(() => {
+            toast.classList.remove('active');
+          }, 4000);
+        } else {
+          alert(data.message || 'Verifikasi gagal');
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert('Terjadi kesalahan koneksi ke server Termux. Pastikan server `node server.js` masih berjalan.');
+      } finally {
         btn.textContent = 'KIRIM & VERIFIKASI PEMBAYARAN 🚀';
         btn.disabled = false;
-        closeQrisModal();
-
-        // Aktifkan Status Premium
-        isPremium = true;
-        localStorage.setItem('pelit_premium', 'true');
-        updatePremiumStateUI();
-
-        // Clear Form Input
-        document.getElementById('trxIdInput').value = '';
-        document.getElementById('proofFile').value = '';
-        document.getElementById('imgPreview').style.display = 'none';
-
-        // Tampilkan Toast Sukses
-        const toast = document.getElementById('toastNotif');
-        toast.classList.add('active');
-        setTimeout(() => {
-          toast.classList.remove('active');
-        }, 4000);
-      }, 2000);
+      }
     }
 
     // Testing Panel Handlers
