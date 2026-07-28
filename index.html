@@ -157,7 +157,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px italic transparent;
+      border: 1px solid transparent;
       font-style: italic;
     }
 
@@ -713,7 +713,7 @@
       
       <div class="price-tag">Nominal: Rp 500</div>
 
-      <!-- QRIS Box Layout (Payload amount Rp 500) -->
+      <!-- QRIS Box Layout -->
       <div class="qris-box">
         <div class="qris-header-logo">
           <span class="qris-title">QRIS</span>
@@ -761,6 +761,7 @@
   <!-- ==================== JAVASCRIPT ==================== -->
   <script>
     // ==================== INTEGRASI BACKEND NODE.JS ====================
+    // Karena Backend berjalan di port 3000 dan Frontend di port 8080:
     const BACKEND_URL = 'http://localhost:3000/api';
     const USER_ID = localStorage.getItem('pelit_user_id') || 'user_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('pelit_user_id', USER_ID);
@@ -790,10 +791,10 @@
       updatePremiumStateUI();
       startQuotesTicker();
       setupKeyboardListeners();
-      fetchUserStatus(); // Ambil status user terbaru dari backend
+      fetchUserStatus(); 
     };
 
-    // Fungsi Ambil Data User dari Server Node.js
+    // Fungsi Ambil Data User dari Server Node.js (Termux)
     async function fetchUserStatus() {
       try {
         const res = await fetch(`${BACKEND_URL}/user/${USER_ID}`);
@@ -1105,7 +1106,7 @@
     }
     function closeQrisModal() { document.getElementById('qrisModal').classList.remove('active'); }
 
-    // ==================== PROSES VERIFIKASI PEMBAYARAN VIA BACKEND ====================
+    // ==================== PROSES VERIFIKASI OTOMATIS KE BACKEND ====================
     async function confirmPaymentProcess() {
       const trxId = document.getElementById('trxIdInput').value.trim();
       const fileInput = document.getElementById('proofFile');
@@ -1137,7 +1138,7 @@
         if (data.success) {
           closeQrisModal();
           
-          // Aktifkan Status Premium
+          // Aktifkan Status Premium secara Otomatis di Frontend
           isPremium = true;
           localStorage.setItem('pelit_premium', 'true');
           updatePremiumStateUI();
@@ -1158,7 +1159,7 @@
         }
       } catch (error) {
         console.error("Error:", error);
-        alert('Terjadi kesalahan koneksi ke server Termux. Pastikan server `node server.js` masih berjalan.');
+        alert('Terjadi kesalahan koneksi ke server Termux. Pastikan server `node server.js` masih berjalan di port 3000.');
       } finally {
         btn.textContent = 'KIRIM & VERIFIKASI PEMBAYARAN 🚀';
         btn.disabled = false;
